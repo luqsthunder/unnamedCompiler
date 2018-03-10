@@ -1,0 +1,6 @@
+[package]
+name = "unnamedCompiler"
+version = "0.1.0"
+authors = ["luqsthunder <lucasthund3r@gmail.com>"]
+
+[dependencies]
