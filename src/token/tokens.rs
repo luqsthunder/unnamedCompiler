@@ -28,9 +28,33 @@ pub enum TokenTypes
   ClCurlyBrackets{id: u8, name: str}, // }
 }
 
+pub fn print_token(tk_type: TokenTypes)
+{
+  match tk_type
+  {
+    ID => println(""),
+    TypeInt => println(""),
+    TypeFloat => println(""),
+    TypeChar => println(""),
+    TypeVec => println(""),
+    Statement => println(""),
+    RetKey => println(""),
+    IfKey => println(""),
+    ElseKey => println(""),
+    EqOpr => println(""),
+    LgtOpr => println(""),
+    OpBrackets => println(""),
+    ClBrackets => println(""),
+    OpParenthesys => println(""),
+    ClParenthesys => println(""),
+    OpCurlyBrackets => println(""),
+    ClCurlyBrackets => println(""),
+  }
+}
+
 pub struct Token
 {
   line: u64,
   col: u64,
-  type: TokenTypes,
+  kind: TokenTypes,
 }

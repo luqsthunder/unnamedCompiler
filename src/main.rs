@@ -3,6 +3,7 @@ extern crate regex;
 use std::env;
 mod code_file;
 use code_file::source_code::SourceCode;
+
 fn main()
 {
   let file_name = match env::args().nth(1)
