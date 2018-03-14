@@ -1,3 +1,5 @@
+extern crate regex;
+
 use std::env;
 mod code_file;
 use code_file::source_code::SourceCode;
