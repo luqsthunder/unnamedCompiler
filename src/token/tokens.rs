@@ -3,58 +3,46 @@
 //!    statement keywords: if, else
 //!
 
+#[derive(Debug)]
+#[derive(PartialEq)]
 pub enum TokenTypes
 {
-  ID{id: u8, name: str},              // ID of a var, const value
-  TypeInt{id: u8, name: str},         // type integer
-  TypeFloat{id: u8, name: str},       // type float
-  TypeChar{id: u8, name: str},        // type character
-  TypeVec{id: u8, name: str},         // type vector
-  Expr{id: u8, name: str},            // expression with a boolean value
-  Statement{id: u8, name: str},       // the body of things like function { here is a statement }
-  Fndef{id: u8, name: str},           // function token
-  FnCall{id: u8, name: str},          // function call token
-  FnParam{id: u8, name: str},         // function param token
-  RetKey{id: u8, name: str},          // return keyword
-  IfKey{id: u8, name: str},           // if keyword
-  ElseKey{id: u8, name: str},         // keyword else
-  EqOpr{id: u8, name: str},           // operator equals or not equals
-  LgtOpr{id: u8, name: str},          // operator larger greater or less than
-  OpBrackets{id: u8, name: str},      // [
-  ClBrackets{id: u8, name: str},      // ]
-  OpParenthesys{id: u8, name: str},   // (
-  ClParenthesys{id: u8, name: str},   // )
-  OpCurlyBrackets{id: u8, name: str}, // {
-  ClCurlyBrackets{id: u8, name: str}, // }
+  ID,                 // ID of a var, const value
+  TypeInt,           // type integer
+  TypeFloat,         // type float
+  TypeChar,          // type character
+  TypeVec,           // type vector
+  Err,                // only for pattern matching errors
+  RetKey,            // return keyword
+  ForKey,            // for keyword
+  WhileKey,          // while keyword
+  IfKey,             // if keyword
+  ElseKey,           // keyword else
+  Dread,             // # comment
+  Oprm,              // * or /
+  Oprp,              // + or -
+  FloatConst,       // 1.29
+  CharConst,        // 'a'
+  IntConst,         // 123
+  StringConst,      // "lol"
+  OprlrEq,          // operator equals or not equals
+  OprlrLgt,         // operator larger greater or less than
+  OprlrLgtEq,       // operator larger greater or less than
+  OpBrackets,       // [
+  ClBrackets,       // ]
+  OpParenthesys,    // (
+  ClParenthesys,    // )
+  OpCurlyBrackets,  // {
+  ClCurlyBrackets,  // }
+  Comma,             // ,
 }
 
-pub fn print_token(tk_type: TokenTypes)
-{
-  match tk_type
-  {
-    ID => println(""),
-    TypeInt => println(""),
-    TypeFloat => println(""),
-    TypeChar => println(""),
-    TypeVec => println(""),
-    Statement => println(""),
-    RetKey => println(""),
-    IfKey => println(""),
-    ElseKey => println(""),
-    EqOpr => println(""),
-    LgtOpr => println(""),
-    OpBrackets => println(""),
-    ClBrackets => println(""),
-    OpParenthesys => println(""),
-    ClParenthesys => println(""),
-    OpCurlyBrackets => println(""),
-    ClCurlyBrackets => println(""),
-  }
-}
-
+#[derive(Debug)]
 pub struct Token
 {
-  line: u64,
-  col: u64,
-  kind: TokenTypes,
+  pub line: usize,
+  pub col: usize,
+  pub kind: TokenTypes,
+  pub neg: bool,
+  pub str_tk: String,
 }

@@ -1,2 +1,2 @@
-mod tokens;
-mod grammar;
+pub mod tokens;
+pub mod grammar;
