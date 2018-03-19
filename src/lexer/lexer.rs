@@ -67,7 +67,7 @@ impl Lexer
     rgx_list.push(regex::Regex::new(grammar::INT_CONSTANT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::CHAR_CONSTANT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::STRING_CONSTANT).unwrap());
-    rgx_list.push(regex::Regex::new("(\\ )+").unwrap());
+    rgx_list.push(regex::Regex::new("( )+").unwrap());
 
     let ret = Lexer{tokens_list: LinkedList::new(), regex_list: rgx_list,
                     src: Vec::new()};
