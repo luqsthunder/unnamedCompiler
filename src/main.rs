@@ -1,7 +1,6 @@
 extern crate regex;
 
 use std::env;
-use code_file::source_code::SourceCode;
 mod lexer;
 use lexer::lexer::Lexer;
 mod token;
@@ -14,6 +13,10 @@ fn main()
     _ => panic!("no file passed as arg"),
   };
 
-  let mut lexer = Lexer::new(file_name)?;
+  let mut lexer = match Lexer::new(file_name)
+  {
+    Ok(t) => t,
+    Err(_) => panic!("no file found or cant read"),
+  };
   lexer.run();
 }

@@ -1,6 +1,5 @@
 extern crate regex;
 
-
 use token::tokens::Token;
 use token::grammar;
 use token::tokens::TokenTypes;
@@ -68,8 +67,7 @@ impl Lexer
     rgx_list.push(regex::Regex::new(grammar::INT_CONSTANT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::CHAR_CONSTANT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::STRING_CONSTANT).unwrap());
-
-
+    rgx_list.push(regex::Regex::new("(\\ )+").unwrap());
 
     let ret = Lexer{tokens_list: LinkedList::new(), regex_list: rgx_list,
                     src: Vec::new()};
@@ -89,7 +87,7 @@ impl Lexer
 
     let mut file_content = String::new();
 
-    match file.read_to_string(&mut file_content)
+    match file.read_to_string(& mut file_content)
     {
       Ok(t) => t,
       Err(_) =>
@@ -112,18 +110,30 @@ impl Lexer
 
   pub fn run(&mut self)
   {
-
+    let line = String::from("int functionlol(int a, int b)");
+    self.next_token(line, 0);
   }
 
   fn next_token(&self, mut line_str: String, line: usize)
-                -> (Vec<Token>, String)
   {
+    let n_tk:Vec<String> =
+      self.regex_list.iter()
+                      .filter(|rgx| rgx.captures(line_str.as_str()).is_some())
+                      .map(|rgx| rgx.captures(line_str.as_str())
+                                    .unwrap()
+                                    .iter()
+                                    .filter(|r| r.is_some())
+                                    .map(|r| r.unwrap())
+                                    .filter(|r| r.start() == 0)
+                                    .map(|r| String::from(r.as_str()))
+                                    .collect())
+                      .collect();
+    println!("{:?}", n_tk);
+
+    /*
     let mut cut_pos: usize = 0;
     let mut regx_name = String::new();
 
-    /*self.regex_list.iter().map(|rgx|  {
-      rgx.captures(line_str.as_str()).iter();
-    });*/
 
     for rgx in self.regex_list.iter()
     {
@@ -141,16 +151,16 @@ impl Lexer
 
       println!("could come here");
 
-      let firstMatch = match caps.get(0)
+      let first_match = match caps.get(0)
       {
         Some(t) => t,
         None => continue,
       };
 
-      if firstMatch.start() == 0
+      if first_match.start() == 0
       {
-        println!("{:?}", firstMatch);
-        cut_pos = firstMatch.end();
+        println!("{:?}", first_match);
+        cut_pos = first_match.end();
         regx_name = rgx.as_str().to_string();
         break;
       }
@@ -166,22 +176,7 @@ impl Lexer
     {
       let str_ret = line_str.drain(..cut_pos).collect();
       str_ret
-    };
-
-    let tk_string = tk_str;
-    let tks_types = Lexer::tk_type_from_str(&regx_name);
-    let mut tk_vec:Vec<Token> = Vec::new();
-
-      tks_types.iter().for_each(
-         |tkt| {
-         let tk_cp = *tkt;
-         tk_vec.push(Token{line: line, col: cut_pos, str_tk: regx_name.clone(),
-                           kind: tk_cp,
-                           neg: Lexer::tk_is_str_neg(tk_string, &tkt) });
-         }
-      );
-
-    return (tk_vec, line_str);
+    };*/
   }
 
   fn tk_type_from_str(s: &String) -> Vec<TokenTypes>

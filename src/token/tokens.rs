@@ -13,7 +13,7 @@ pub enum TokenTypes
   TypeFloat,         // type float
   TypeChar,          // type character
   TypeVec,           // type vector
-  Err,               // only for pattern matching errors
+  Err,               // only for pattern matching
   RetKey,            // return keyword
   ForKey,            // for keyword
   WhileKey,          // while keyword
