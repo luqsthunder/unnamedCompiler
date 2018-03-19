@@ -1,5 +1,6 @@
 extern crate regex;
 
+
 use token::tokens::Token;
 use token::grammar;
 use token::tokens::TokenTypes;
@@ -73,13 +74,13 @@ impl Lexer
     let ret = Lexer{tokens_list: LinkedList::new(), regex_list: rgx_list,
                     src: Vec::new()};
 
-    let mut file = match File::open(file_path)
+    let mut file = match File::open(&file_path)
     {
       Ok(t) => t,
       Err(_) =>
       {
         let error = FileLexerError {
-          message: String::from("cant open file: ") + file_path.as_str(),
+          message: String::from("cant open file: "),// + file_path.as_str(),
           cause: FileErrorType::OPEN,
         };
         return Err(error);
@@ -114,12 +115,15 @@ impl Lexer
 
   }
 
-  fn next_token(&self, mut line_str: String, line: usize,
-                col: usize) -> (Token, String)
+  fn next_token(&self, mut line_str: String, line: usize)
+                -> (Vec<Token>, String)
   {
     let mut cut_pos: usize = 0;
     let mut regx_name = String::new();
-    let mut neg: bool = false;
+
+    /*self.regex_list.iter().map(|rgx|  {
+      rgx.captures(line_str.as_str()).iter();
+    });*/
 
     for rgx in self.regex_list.iter()
     {
@@ -134,14 +138,14 @@ impl Lexer
       {
         continue;
       }
-      
+
       println!("could come here");
 
       let firstMatch = match caps.get(0)
       {
         Some(t) => t,
         None => continue,
-      };  
+      };
 
       if firstMatch.start() == 0
       {
@@ -150,77 +154,93 @@ impl Lexer
         regx_name = rgx.as_str().to_string();
         break;
       }
-      
+
     }
 
-    if regx_name == grammar::DREAD
+    let tk_str: String = if regx_name == grammar::DREAD
     {
-      line_str.drain(..line_str.len());
+      let str_ret = line_str.drain(..line_str.len()).collect();
+      str_ret
     }
     else
     {
-      line_str.drain(..cut_pos);
-    }
+      let str_ret = line_str.drain(..cut_pos).collect();
+      str_ret
+    };
 
-    return (Token{line: line, col:cut_pos, str_tk: regx_name.clone(),
-                   kind: Lexer::tk_type_from_str(&regx_name)}, line_str);
+    let tk_string = tk_str;
+    let tks_types = Lexer::tk_type_from_str(&regx_name);
+    let mut tk_vec:Vec<Token> = Vec::new();
+
+      tks_types.iter().for_each(
+         |tkt| {
+         let tk_cp = *tkt;
+         tk_vec.push(Token{line: line, col: cut_pos, str_tk: regx_name.clone(),
+                           kind: tk_cp,
+                           neg: Lexer::tk_is_str_neg(tk_string, &tkt) });
+         }
+      );
+
+    return (tk_vec, line_str);
   }
 
-  fn tk_type_from_str(s: &String) -> TokenTypes
+  fn tk_type_from_str(s: &String) -> Vec<TokenTypes>
   {
     match s.as_str()
     {
-      grammar::FOR => TokenTypes::ForKey,
-      grammar::WHILE => TokenTypes::WhileKey,
-      grammar::IF => TokenTypes::IfKey,
-      grammar::ELSE => TokenTypes::ElseKey,
-      grammar::INT => TokenTypes::TypeInt,
-      grammar::CHAR => TokenTypes::TypeChar,
-      grammar::FLOAT => TokenTypes::TypeFloat,
-      grammar::STRING => TokenTypes::TypeChar,
-      grammar::VEC => TokenTypes::TypeVec,
-      grammar::OP_BRACKET => TokenTypes::OpBrackets,
-      grammar::CL_BRACKET => TokenTypes::ClBrackets,
-      grammar::OP_CURLY => TokenTypes::OpCurlyBrackets,
-      grammar::CL_CURLY => TokenTypes::ClCurlyBrackets,
-      grammar::OP_PARENT => TokenTypes::OpParenthesys,
-      grammar::CL_PARENT => TokenTypes::ClParenthesys,
-      grammar::COMMA => TokenTypes::Comma,
-      grammar::OPRP => TokenTypes::Oprp,
-      grammar::OPRM => TokenTypes::Oprm,
-      grammar::OPRLR_LGT => TokenTypes::OprlrLgt,
-      grammar::OPRLR_LGT_EQ => TokenTypes::OprlrLgtEq,
-      grammar::OPRLR_EQ => TokenTypes::OprlrEq,
-      grammar::DREAD=> TokenTypes::Dread,
-      grammar::ID => TokenTypes::ID,
-      grammar::INT_CONSTANT=> TokenTypes::IntConst,
-      grammar::FLOAT_CONSTANT=> TokenTypes::FloatConst,
-      grammar::CHAR_CONSTANT=> TokenTypes::CharConst,
-      grammar::STRING_CONSTANT=> TokenTypes::StringConst,
-
-      _ => TokenTypes::Err,
+      grammar::FOR => vec![TokenTypes::ForKey],
+      grammar::WHILE => vec![TokenTypes::WhileKey],
+      grammar::IF => vec![TokenTypes::IfKey],
+      grammar::ELSE => vec![TokenTypes::ElseKey],
+      grammar::INT => vec![TokenTypes::TypeInt],
+      grammar::CHAR => vec![TokenTypes::TypeChar],
+      grammar::FLOAT => vec![TokenTypes::TypeFloat],
+      grammar::STRING => vec![TokenTypes::TypeChar],
+      grammar::VEC => vec![TokenTypes::TypeVec],
+      grammar::OP_BRACKET => vec![TokenTypes::OpBrackets],
+      grammar::CL_BRACKET => vec![TokenTypes::ClBrackets],
+      grammar::OP_CURLY => vec![TokenTypes::OpCurlyBrackets],
+      grammar::CL_CURLY => vec![TokenTypes::ClCurlyBrackets],
+      grammar::OP_PARENT => vec![TokenTypes::OpParenthesys],
+      grammar::CL_PARENT => vec![TokenTypes::ClParenthesys],
+      grammar::COMMA => vec![TokenTypes::Comma],
+      grammar::OPRP => vec![TokenTypes::Oprp],
+      grammar::OPRM => vec![TokenTypes::Oprm],
+      grammar::OPRLR_LGT => vec![TokenTypes::OprlrLgt],
+      grammar::OPRLR_LGT_EQ => vec![TokenTypes::OprlrLgtEq],
+      grammar::OPRLR_EQ => vec![TokenTypes::OprlrEq],
+      grammar::DREAD => vec![TokenTypes::Dread],
+      grammar::ID => vec![TokenTypes::ID],
+      grammar::INT_CONSTANT => vec![TokenTypes::IntConst],
+      grammar::FLOAT_CONSTANT => vec![TokenTypes::FloatConst],
+      grammar::CHAR_CONSTANT => vec![TokenTypes::CharConst],
+      grammar::STRING_CONSTANT => vec![TokenTypes::StringConst],
+      "string" => vec![TokenTypes::TypeChar, TokenTypes::TypeVec],
+      _ => vec![TokenTypes::Err],
     }
   }
 
-  fn tk_is_str_neg(tk_str: str, tk: TokenTypes) -> bool
+  fn tk_is_str_neg(tk_str: String, tk: &TokenTypes) -> bool
   {
-    match tk
+    match *tk
     {
-      TokenTypes::Oprm => return tk_str == "+"
-      TokenTypes::Oprm => return tk_str == "+"
-      TokenTypes::Oprm => return tk_str == "+"
-      TokenTypes::Oprm => return tk_str == "+"
+      TokenTypes::Oprp => return tk_str == "+",
+      TokenTypes::Oprm => return tk_str == "*",
+      TokenTypes::OprlrLgt => return tk_str == ">",
+      TokenTypes::OprlrLgtEq => return tk_str == ">=",
+      TokenTypes::Oprm => return tk_str == "==",
+      _ => true,
     }
   }
 
-}
+  fn create_line_list(file_content: String) -> Vec<String>
+  {
+    let src_in_lines: Vec<_> =
+          file_content.lines()
+                      .map(|x| String::from(x))
+                      .collect();
 
-fn create_line_list(file_content: String) -> Vec<String>
-{
-  let mut src_in_lines: Vec<_> =
-    file_content.lines()
-                .map(|x| String::from(x))
-                .collect();
+    return src_in_lines;
+  }
 
-  return src_in_lines;
 }

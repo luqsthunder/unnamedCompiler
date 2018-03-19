@@ -5,14 +5,15 @@
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum TokenTypes
 {
-  ID,                 // ID of a var, const value
+  ID,                // ID of a var, const value
   TypeInt,           // type integer
   TypeFloat,         // type float
   TypeChar,          // type character
   TypeVec,           // type vector
-  Err,                // only for pattern matching errors
+  Err,               // only for pattern matching errors
   RetKey,            // return keyword
   ForKey,            // for keyword
   WhileKey,          // while keyword
@@ -21,19 +22,19 @@ pub enum TokenTypes
   Dread,             // # comment
   Oprm,              // * or /
   Oprp,              // + or -
-  FloatConst,       // 1.29
-  CharConst,        // 'a'
-  IntConst,         // 123
-  StringConst,      // "lol"
-  OprlrEq,          // operator equals or not equals
-  OprlrLgt,         // operator larger greater or less than
-  OprlrLgtEq,       // operator larger greater or less than
-  OpBrackets,       // [
-  ClBrackets,       // ]
-  OpParenthesys,    // (
-  ClParenthesys,    // )
-  OpCurlyBrackets,  // {
-  ClCurlyBrackets,  // }
+  OprlrEq,           // operator equals or not equals
+  OprlrLgt,          // operator larger greater or less than
+  OprlrLgtEq,        // operator larger greater or less than
+  FloatConst,        // 1.29
+  CharConst,         // 'a'
+  IntConst,          // 123
+  StringConst,       // "lol"
+  OpBrackets,        // [
+  ClBrackets,        // ]
+  OpParenthesys,     // (
+  ClParenthesys,     // )
+  OpCurlyBrackets,   // {
+  ClCurlyBrackets,   // }
   Comma,             // ,
 }
 
