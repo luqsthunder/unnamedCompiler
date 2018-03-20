@@ -1,4 +1,5 @@
-//! keywords: 
+#![allow(dead_code)]
+//! keywords:
 //!    types: int, float, char, vec types-> int::, string(char::), float::
 //!    statement keywords: if, else
 //!

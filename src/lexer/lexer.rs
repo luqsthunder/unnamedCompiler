@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 extern crate regex;
 
 use token::tokens::Token;
@@ -110,18 +112,23 @@ impl Lexer
 
   pub fn run(&mut self)
   {
-    let line = String::from("int functionlol(int a, int b)");
-    let (tk, nstr) = self.next_token(line, 0);
+    let mut line_pos = 0;
+    let line = String::from("int functionlol#(int a, int b)");
+
+    let line_length = line.len();
+    let (tk, nstr) = self.next_token(line, 0, line_pos);
     println!("{:?} {}", tk, nstr);
+    line_pos = line_length - nstr.len();
 
-    let (tk2, nstr2) = self.next_token(nstr, 0);
+    let (tk2, nstr2) = self.next_token(nstr, 0, line_pos);
     println!("{:?} {}", tk2, nstr2);
+    line_pos = line_length - nstr2.len();
 
-    let (tk3, nstr3) = self.next_token(nstr2, 0);
+    let (tk3, nstr3) = self.next_token(nstr2, 0, line_pos);
     println!("{:?} {}", tk3, nstr3);
   }
 
-  fn next_token(&self,line_str: String, line: usize)
+  fn next_token(&self,line_str: String, line: usize, line_pos: usize)
                 -> (Vec<Token>, String)
   {
     let mut cut_pos: usize = 0;
@@ -129,12 +136,11 @@ impl Lexer
     let mut tk_str = String::new();
     let mut line_str_cp = line_str.clone();
 
-    let mut white = false;
-    let mut end_rgx = false;
+    let mut found = false;
 
     let mut curr_line = line_str.clone();
 
-    while ((! white) && (! end_rgx))
+    while ! found
     {
       for rgx in self.regex_list.iter()
       {
@@ -167,8 +173,7 @@ impl Lexer
           }
           regx_name = rgx.as_str().to_string();
 
-          white = true;
-          end_rgx = true;
+          found = true;
           break;
         }
       }
@@ -177,7 +182,7 @@ impl Lexer
 
     if tk_str == "#"
     {
-      line_str_cp.drain(..tk_str.len());
+      line_str_cp.drain(..curr_line.len());
     }
     else
     {
@@ -186,15 +191,14 @@ impl Lexer
 
     let tks:Vec<Token> =
       Lexer::tk_type_from_str(&tk_str).iter()
-                                     .map(|t| Token{
-                                       line: line,
-                                       col: cut_pos,
-                                       kind: t.clone(),
-                                       neg: Lexer::tk_is_str_neg(&tk_str, t),
-                                       str_tk: regx_name.clone(),
-                                     })
-                                     .collect();
-    println!("return {}", line_str_cp);
+                                      .map(|t| Token{
+                                        line: line,
+                                        col: cut_pos + line_pos,
+                                        kind: t.clone(),
+                                        neg: Lexer::tk_is_str_neg(&tk_str, t),
+                                        str_tk: regx_name.clone(),
+                                      })
+                                      .collect();
     (tks, line_str_cp)
   }
 
@@ -209,7 +213,7 @@ impl Lexer
       grammar::INT => vec![TokenTypes::TypeInt],
       grammar::CHAR => vec![TokenTypes::TypeChar],
       grammar::FLOAT => vec![TokenTypes::TypeFloat],
-      grammar::STRING => vec![TokenTypes::TypeChar],
+      grammar::STRING => vec![TokenTypes::TypeChar, TokenTypes::TypeVec],
       grammar::VEC => vec![TokenTypes::TypeVec],
       grammar::OP_BRACKET => vec![TokenTypes::OpBrackets],
       grammar::CL_BRACKET => vec![TokenTypes::ClBrackets],
@@ -229,7 +233,6 @@ impl Lexer
       grammar::FLOAT_CONSTANT => vec![TokenTypes::FloatConst],
       grammar::CHAR_CONSTANT => vec![TokenTypes::CharConst],
       grammar::STRING_CONSTANT => vec![TokenTypes::StringConst],
-      "string" => vec![TokenTypes::TypeChar, TokenTypes::TypeVec],
       _ => vec![TokenTypes::Err],
     }
   }
