@@ -28,9 +28,9 @@ pub const OPRLR_EQ: &'static str = "!=|==";
 
 pub const DREAD: &'static str = "#";
 
-pub const ID: &'static str = "([a-z]|[A-Z]|[0-9]*)?";
+pub const ID: &'static str = "([a-z]|[A-Z])(([a-zA-Z]|[0-9])+)?";
 
 pub const FLOAT_CONSTANT: &'static str = "([0-9]*\\.[0-9]+)";
 pub const INT_CONSTANT: &'static str = "([1-9]*[0-9]+)";
-pub const CHAR_CONSTANT: &'static str = "";
-pub const STRING_CONSTANT: &'static str = "";
+pub const CHAR_CONSTANT: &'static str = "\'[a-zA-Z0-9]\'";
+pub const STRING_CONSTANT: &'static str = "\" [a-zA-Z0-9]*\"";

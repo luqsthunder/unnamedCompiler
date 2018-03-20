@@ -34,6 +34,7 @@ impl Lexer
   {
 
     let mut rgx_list: Vec<regex::Regex> = Vec::new();
+    rgx_list.push(regex::Regex::new("( )+").unwrap());
     rgx_list.push(regex::Regex::new(grammar::FOR).unwrap());
     rgx_list.push(regex::Regex::new(grammar::WHILE).unwrap());
     rgx_list.push(regex::Regex::new(grammar::IF).unwrap());
@@ -67,7 +68,6 @@ impl Lexer
     rgx_list.push(regex::Regex::new(grammar::INT_CONSTANT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::CHAR_CONSTANT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::STRING_CONSTANT).unwrap());
-    rgx_list.push(regex::Regex::new("( )+").unwrap());
 
     let ret = Lexer{tokens_list: LinkedList::new(), regex_list: rgx_list,
                     src: Vec::new()};
@@ -111,72 +111,91 @@ impl Lexer
   pub fn run(&mut self)
   {
     let line = String::from("int functionlol(int a, int b)");
-    self.next_token(line, 0);
+    let (tk, nstr) = self.next_token(line, 0);
+    println!("{:?} {}", tk, nstr);
+
+    let (tk2, nstr2) = self.next_token(nstr, 0);
+    println!("{:?} {}", tk2, nstr2);
+
+    let (tk3, nstr3) = self.next_token(nstr2, 0);
+    println!("{:?} {}", tk3, nstr3);
   }
 
-  fn next_token(&self, mut line_str: String, line: usize)
+  fn next_token(&self,line_str: String, line: usize)
+                -> (Vec<Token>, String)
   {
-    let n_tk:Vec<String> =
-      self.regex_list.iter()
-                      .filter(|rgx| rgx.captures(line_str.as_str()).is_some())
-                      .map(|rgx| rgx.captures(line_str.as_str())
-                                    .unwrap()
-                                    .iter()
-                                    .filter(|r| r.is_some())
-                                    .map(|r| r.unwrap())
-                                    .filter(|r| r.start() == 0)
-                                    .map(|r| String::from(r.as_str()))
-                                    .collect())
-                      .collect();
-    println!("{:?}", n_tk);
-
-    /*
     let mut cut_pos: usize = 0;
     let mut regx_name = String::new();
+    let mut tk_str = String::new();
+    let mut line_str_cp = line_str.clone();
 
+    let mut white = false;
+    let mut end_rgx = false;
 
-    for rgx in self.regex_list.iter()
+    let mut curr_line = line_str.clone();
+
+    while ((! white) && (! end_rgx))
     {
-      println!("hiho {:?}", rgx);
-      let caps = match rgx.captures(line_str.as_str())
+      for rgx in self.regex_list.iter()
       {
-        Some(t) => t,
-        None => continue,
-      };
+        let caps = match rgx.captures(curr_line.as_str())
+        {
+          Some(t) => t,
+          None => continue,
+        };
 
-      if caps.len() == 0
-      {
-        continue;
+        if caps.len() == 0
+        {
+          continue;
+        }
+
+        let first_match = match caps.get(0)
+        {
+          Some(t) => t,
+          None => continue,
+        };
+
+        if first_match.start() == 0
+        {
+          tk_str.push_str(first_match.as_str());
+          cut_pos = first_match.end();
+          if tk_str.chars().nth(0).unwrap() == ' '
+          {
+            tk_str.clear();
+            line_str_cp.drain(..cut_pos);
+            break;
+          }
+          regx_name = rgx.as_str().to_string();
+
+          white = true;
+          end_rgx = true;
+          break;
+        }
       }
-
-      println!("could come here");
-
-      let first_match = match caps.get(0)
-      {
-        Some(t) => t,
-        None => continue,
-      };
-
-      if first_match.start() == 0
-      {
-        println!("{:?}", first_match);
-        cut_pos = first_match.end();
-        regx_name = rgx.as_str().to_string();
-        break;
-      }
-
+      curr_line = line_str_cp.clone();
     }
 
-    let tk_str: String = if regx_name == grammar::DREAD
+    if tk_str == "#"
     {
-      let str_ret = line_str.drain(..line_str.len()).collect();
-      str_ret
+      line_str_cp.drain(..tk_str.len());
     }
     else
     {
-      let str_ret = line_str.drain(..cut_pos).collect();
-      str_ret
-    };*/
+      line_str_cp.drain(..cut_pos);
+    }
+
+    let tks:Vec<Token> =
+      Lexer::tk_type_from_str(&tk_str).iter()
+                                     .map(|t| Token{
+                                       line: line,
+                                       col: cut_pos,
+                                       kind: t.clone(),
+                                       neg: Lexer::tk_is_str_neg(&tk_str, t),
+                                       str_tk: regx_name.clone(),
+                                     })
+                                     .collect();
+    println!("return {}", line_str_cp);
+    (tks, line_str_cp)
   }
 
   fn tk_type_from_str(s: &String) -> Vec<TokenTypes>
@@ -215,16 +234,16 @@ impl Lexer
     }
   }
 
-  fn tk_is_str_neg(tk_str: String, tk: &TokenTypes) -> bool
+  fn tk_is_str_neg(tk_str: &String, tk: &TokenTypes) -> bool
   {
     match *tk
     {
-      TokenTypes::Oprp => return tk_str == "+",
-      TokenTypes::Oprm => return tk_str == "*",
-      TokenTypes::OprlrLgt => return tk_str == ">",
-      TokenTypes::OprlrLgtEq => return tk_str == ">=",
-      TokenTypes::Oprm => return tk_str == "==",
-      _ => true,
+      TokenTypes::Oprp => return tk_str == "-",
+      TokenTypes::Oprm => return tk_str == "/",
+      TokenTypes::OprlrLgt => return tk_str == "<",
+      TokenTypes::OprlrLgtEq => return tk_str == "<=",
+      TokenTypes::OprlrEq => return tk_str == "!=",
+      _ => false,
     }
   }
 
