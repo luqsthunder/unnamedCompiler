@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 //! keywords:
 //!    types: int, float, char, vec types-> int::, string(char::), float::
 //!    statement keywords: if, else
@@ -14,6 +13,7 @@ pub enum TokenTypes
   TypeFloat,         // type float
   TypeChar,          // type character
   TypeVec,           // type vector
+  VoidKey,           // void keyword
   Err,               // only for pattern matching
   RetKey,            // return keyword
   ForKey,            // for keyword
@@ -23,12 +23,16 @@ pub enum TokenTypes
   Dread,             // # comment
   Oprm,              // * or /
   Oprp,              // + or -
+  OprlOr,            // or
+  OprlAnd,           // and
+  OprlNot,           // not
+  OprPP,             // ++
   OprlrEq,           // operator equals or not equals
   OprlrLgt,          // operator larger greater or less than
   OprlrLgtEq,        // operator larger greater or less than
-  FloatConst,        // 1.29
+  NumericConst,      // 1.29
+  AttrTo,            // =
   CharConst,         // 'a'
-  IntConst,          // 123
   StringConst,       // "lol"
   OpBrackets,        // [
   ClBrackets,        // ]
@@ -37,6 +41,7 @@ pub enum TokenTypes
   OpCurlyBrackets,   // {
   ClCurlyBrackets,   // }
   Comma,             // ,
+  Semicolon,         // ;
 }
 
 #[derive(Debug)]
