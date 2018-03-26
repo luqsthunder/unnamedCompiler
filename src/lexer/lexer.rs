@@ -71,7 +71,8 @@ impl Lexer
     rgx_list.push(regex::Regex::new(grammar::OPRLR_LGT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::OPRLR_EQ).unwrap());
 
-    rgx_list.push(regex::Regex::new(grammar::DREAD).unwrap());
+	rgx_list.push(regex::Regex::new(grammar::PRINT).unwrap());
+    rgx_list.push(regex::Regex::new(grammar::COMMENT).unwrap());
     rgx_list.push(regex::Regex::new(grammar::ID).unwrap());
 
     rgx_list.push(regex::Regex::new(grammar::ATTR_TO).unwrap());
@@ -124,7 +125,6 @@ impl Lexer
   {
     for (idx, line) in self.src.iter().enumerate()
     {
-      println!("line: {} {}", idx, line);
       let mut curr_line = line.clone();
       while ! curr_line.is_empty()
       {
@@ -132,10 +132,9 @@ impl Lexer
                                              line.len() - curr_line.len());
         curr_line.clear();
         curr_line.insert_str(0, new_str.as_str());
-        println!("{:?}", tks);
         for t in tks.into_iter()
         {
-          if t.kind == TokenTypes::Err
+          if t.kind == TokenTypes::ErrorMatch
           {
             panic!("wrong expression at \n {} \n line:{} col:{}", line, idx + 1,
                    line.len() - curr_line.len());
@@ -150,7 +149,7 @@ impl Lexer
 
     for tk in self.tokens_list.iter()
     {
-      println!("{:?}", tk);
+      Lexer::print_token_as_alcino_likes(tk);
     }
   }
 
@@ -233,7 +232,7 @@ impl Lexer
                                         line: line,
                                         col: cut_pos + line_pos,
                                         kind: t.clone(),
-                                        neg: Lexer::tk_is_str_neg(&tk_str, t),
+                                        inverse: Lexer::tk_is_str_inverse(&tk_str, t),
                                         str_tk: tk_str.clone(),
                                       })
                                       .collect();
@@ -274,21 +273,23 @@ impl Lexer
 
       grammar::OPR_PP => vec![TokenTypes::OprPP],
 
+	  grammar::PRINT => vec![TokenTypes::PrintFun],
+	  
       grammar::OPRP => vec![TokenTypes::Oprp],
       grammar::OPRM => vec![TokenTypes::Oprm],
       grammar::OPRLR_LGT => vec![TokenTypes::OprlrLgt],
       grammar::OPRLR_LGT_EQ => vec![TokenTypes::OprlrLgtEq],
       grammar::OPRLR_EQ => vec![TokenTypes::OprlrEq],
-      grammar::DREAD => vec![TokenTypes::Dread],
+      grammar::COMMENT => vec![TokenTypes::Comment],
       grammar::ID => vec![TokenTypes::ID],
       grammar::NUMERIC_CONSTANT => vec![TokenTypes::NumericConst],
       grammar::CHAR_CONSTANT => vec![TokenTypes::CharConst],
       grammar::STRING_CONSTANT => vec![TokenTypes::StringConst],
-      _ => vec![TokenTypes::Err],
+      _ => vec![TokenTypes::ErrorMatch],
     }
   }
 
-  fn tk_is_str_neg(tk_str: &String, tk: &TokenTypes) -> bool
+  fn tk_is_str_inverse(tk_str: &String, tk: &TokenTypes) -> bool
   {
     match *tk
     {
@@ -311,4 +312,13 @@ impl Lexer
     return src_in_lines;
   }
 
+  fn print_token_as_alcino_likes(tk: &Token)
+  {
+	let kt = tk.clone();
+	let kind_value = kt.kind.clone() as u8;
+	let kind_str = kt.kind.to_string();
+	println!("[{:#03}, {:#03}] ({:#04}, {:10} {{{}}})", kt.line, kt.col, 
+	         kind_value, kind_str, kt.str_tk);
+  }
+  
 }
