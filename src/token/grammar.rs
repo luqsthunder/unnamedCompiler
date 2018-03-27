@@ -39,10 +39,11 @@ pub const ATTR_TO: &'static str = "=";
 
 pub const COMMENT: &'static str = "#";
 
-pub const PRINT: &'static str = "print";
+pub const PRINT_FUN: &'static str = "print";
 
 pub const ID: &'static str = "([a-zA-Z])([a-zA-Z0-9]+)?";
 
-pub const NUMERIC_CONSTANT: &'static str = "(([0-9]*\\.[0-9]+)|([0-9]+))";
+pub const FLOAT_CONSTANT: &'static str = "(([0-9]*\\.[0-9]+)|([0-9]+))";
+pub const INT_CONSTANT: &'static str = "[0-9]+";
 pub const CHAR_CONSTANT: &'static str = "\'[a-zA-Z0-9]\'";
 pub const STRING_CONSTANT: &'static str = "\"[a-zA-Z0-9_ ]*\"";
