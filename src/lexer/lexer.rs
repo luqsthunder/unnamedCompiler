@@ -6,8 +6,11 @@ use token::tokens::TokenTypes;
 
 use std::vec;
 use std::fs::File;
+use std::io::Seek;
+use std::io::SeekFrom;
 use std::io::Read;
 use std::string::String;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub enum LexerErrorType {
@@ -22,11 +25,20 @@ pub struct LexerError {
   pub message: String,
 }
 
+#[derive(PartialEq)]
+enum LexGroup {
+  Empty,
+  AlphaNumeric,
+  Numeric,
+  Symbol,
+}
+
 pub struct Lexer {
   regex_list: Vec<regex::Regex>,
+  lexemes_tokens: HashMap<String, TokenTypes>,
   src: File,
   line_pos: usize,
-  col_pos: usize
+  col_pos: usize,
 }
 
 impl Lexer {
@@ -91,23 +103,61 @@ pub fn new(file_path: String) -> Result<Lexer, LexerError> {
       return Err(error);
     },
   };
+  let mut lex_tk:HashMap<String, TokenTypes> = HashMap::new();
+  lex_tk.insert(String::from("int"), TokenTypes::TypeInt);
 
   let mut ret = Lexer{regex_list: rgx_list, src: file, col_pos: 0,
-                      line_pos: 0};
+                       line_pos: 0, lexemes_tokens: lex_tk};
   return Ok(ret);
 }
 
-pub fn next_token(& mut self) -> Result<Token, LexerError>
-{
-  let mut single_char:Vec<u8> = Vec::with_capacity(4);
-  single_char.push(0);
-  println!("lol men {}", single_char.len());
-  let mut token_string = String::new();
-  let res_read = match self.src.read_exact(single_char.as_mut()) {
-    Ok(t) => t,
-    Err(e) => panic!(e),
-  };
-  println!("tk :{}", single_char[0] as char);
+pub fn next_token(& mut self) -> Result<Token, LexerError> {
+  let mut token_string:String = String::new();
+  token_string.reserve(10);
+  let mut s_char:Vec<u8> = Vec::with_capacity(1);
+  s_char.push(0);
+
+  let mut lex_group = LexGroup::Empty;
+
+  loop {
+    let read_size = match self.src.read_exact(s_char.as_mut()) {
+      Ok(t) => t,
+      Err(e) => panic!(e),
+    };
+    // alpha-numeric tokens e.g id, int, numbers
+    if (s_char[0] >= ('0' as u8) && s_char[0] <= ('9' as u8)) ||
+       (s_char[0] >= ('a' as u8) && s_char[0] <= ('z' as u8)) ||
+       (s_char[0] >= ('A' as u8) && s_char[0] <= ('Z' as u8)) ||
+       (s_char[0] == ('_' as u8)) {
+
+      if lex_group != LexGroup::AlphaNumeric && lex_group != LexGroup::Empty {
+        self.src.seek(SeekFrom::Current(-1));
+        break;
+      }
+
+      token_string.push(s_char[0] as char);
+      lex_group = LexGroup::AlphaNumeric;
+      continue;
+    }
+    else if s_char[0] != (' ' as u8) && s_char[0] != ('\n' as u8) {
+
+      if lex_group != LexGroup::Symbol && lex_group != LexGroup::Empty {
+        self.src.seek(SeekFrom::Current(-1));
+        break;
+      }
+
+      token_string.push(s_char[0] as char);
+      lex_group = LexGroup::Symbol;
+      continue
+    }
+
+    if !token_string.is_empty() {
+      break;
+    }
+  }
+
+  
+  println!("{}", token_string);
 
   Ok(Token{line:0, col:0, kind: TokenTypes::AttrTo, inverse: false,
            str_tk: String::new()})

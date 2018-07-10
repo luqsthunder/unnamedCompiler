@@ -1,9 +1,9 @@
 int fun() 
 {
-  int a = 0;
-  float x = 123123.123;
-  char a = 'a';
-  if(a == 1)
+  int a=0;
+  float x=123123.123;
+  char a='a';
+  if(a==1)
   {
     a = 7331;  
   }
