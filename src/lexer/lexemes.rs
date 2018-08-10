@@ -47,3 +47,11 @@ pub const FLOAT_CONSTANT: &'static str = "(([0-9]*\\.[0-9]+)|([0-9]+))";
 pub const INT_CONSTANT: &'static str = "[0-9]+";
 pub const CHAR_CONSTANT: &'static str = "\'[a-zA-Z0-9]\'";
 pub const STRING_CONSTANT: &'static str = "\"[a-zA-Z0-9_ ]*\"";
+
+pub const ALL_VEC: &'static [&'static str; 35] =
+     &[FOR, WHILE, IF, ELSE, RETURN, OPRL_OR, OPRL_AND,
+      OPRL_NOT, INT, CHAR, FLOAT, STRING, VEC, VOID, OP_BRACKET,
+      CL_BRACKET, OP_CURLY, CL_CURLY, OP_PARENT, CL_PARENT, COMMA,
+      OPR_PP, OPRP, OPRM, OPRLR_LGT_EQ, OPRLR_LGT, OPRLR_EQ, ATTR_TO,
+      COMMENT, PRINT_FUN, ID, FLOAT_CONSTANT, INT_CONSTANT, CHAR_CONSTANT,
+      STRING_CONSTANT];

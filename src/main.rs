@@ -9,21 +9,19 @@ mod token;
 
 fn main()
 {
-  let file_name = match env::args().nth(1)
-  {
+  let file_name = match env::args().nth(1) {
     Some(t) => t,
     _ => panic!("no file passed as arg"),
   };
 
   println!("{}", file_name);
-  let mut lexer = match Lexer::new(String::from("./fibonacci.un"))
-  {
+  let mut lexer = match Lexer::new(String::from("./fibonacci.un")) {
     Ok(t) => t,
     Err(_) => panic!("no file found or cant read"),
   };
 
-  lexer.next_token();
-  lexer.next_token();
-  lexer.next_token();
-  lexer.next_token();
+  Lexer::print_token_as_alcino_likes(&lexer.next_token().unwrap());
+  Lexer::print_token_as_alcino_likes(&lexer.next_token().unwrap());
+  Lexer::print_token_as_alcino_likes(&lexer.next_token().unwrap());
+  Lexer::print_token_as_alcino_likes(&lexer.next_token().unwrap());
 }

@@ -138,6 +138,5 @@ pub struct Token
   pub line: usize,
   pub col: usize,
   pub kind: TokenTypes,
-  pub inverse: bool,
   pub str_tk: String,
 }
